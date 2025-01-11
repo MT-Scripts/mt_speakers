@@ -13,6 +13,3 @@ CREATE TABLE `speakers_musics` (
 	`url` LONGTEXT NOT NULL,
 	PRIMARY KEY (`musicId`) USING BTREE
 );
-
-ALTER TABLE `player_vehicles`
-ADD COLUMN `speakerInstalled` INT NULL DEFAULT NULL,
