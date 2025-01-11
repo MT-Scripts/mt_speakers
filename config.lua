@@ -1,4 +1,5 @@
 return {
+    framework = 'qbx', -- qbx, qb, esx (Really advice qbox)
     target = 'ox_target', -- ox_target, interact or qb-target
 
     speakers = {

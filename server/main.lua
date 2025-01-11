@@ -1,5 +1,12 @@
 local Config = lib.load('config')
 local speakers = {}
+local FrameworkCore = nil
+
+if Config.framework == 'qb' then
+    FrameworkCore = exports['qb-core']:GetCoreObject()
+elseif Config.framework == 'esx' then
+    FrameworkCore = exports.es_extended:getSharedObject()
+end
 
 MySQL.ready(function()
     MySQL.Async.fetchAll('SELECT * FROM `speakers`', {}, function(result)
@@ -44,8 +51,8 @@ end
 
 lib.callback.register('mt_speakers:server:getUserAccess', function(source, speakerId)
     local src = source
-    local Player = exports.qbx_core:GetPlayer(src)
-    local citizenid = Player.PlayerData.citizenid
+    local Player = Config.framework == 'qb' and FrameworkCore?.Functions.GetPlayer(src) or Config.framework == 'esx' and FrameworkCore?.GetPlayerFromId(src) or exports.qbx_core:GetPlayer(src)
+    local citizenid = Config.framework == 'esx' and Player.getIdentifier or Player.PlayerData.citizenid
     return getUserAccess(citizenid, speakerId)
 end)
 
@@ -56,12 +63,13 @@ end)
 ---@return boolean
 lib.callback.register('mt_speakers:server:placeSpeaker', function(source, speaker, coords, heading)
     local src = source
-    local Player = exports.qbx_core:GetPlayer(src)
+    local Player = Config.framework == 'qb' and FrameworkCore?.Functions.GetPlayer(src) or Config.framework == 'esx' and FrameworkCore?.GetPlayerFromId(src) or exports.qbx_core:GetPlayer(src)
     coords = vec4(coords.x, coords.y, coords.z, heading)
+    local citizenid = Config.framework == 'esx' and Player.getIdentifier or Player.PlayerData.citizenid
     MySQL.insert('INSERT INTO `speakers` (item, location, users, owner) VALUES (?, ?, ?, ?)', {
-        speaker, json.encode(coords), json.encode({}), Player.PlayerData.citizenid
+        speaker, json.encode(coords), json.encode({}), citizenid
     }, function(id)
-        speakers[id] = { prop = Config.speakers[speaker], item = speaker, location = coords, users = {}, id = id, owner = Player.PlayerData.citizenid }
+        speakers[id] = { prop = Config.speakers[speaker], item = speaker, location = coords, users = {}, id = id, owner = citizenid }
         updateSpeakers()
     end)
     return true
@@ -97,14 +105,14 @@ lib.callback.register('mt_speakers:server:songActions', function(source, data)
 end)
 
 lib.callback.register('mt_speakers:server:getPlayerMusics', function(source)
-    local Player = exports.qbx_core:GetPlayer(source)
-    local citizenid = Player.PlayerData.citizenid
+    local Player = Config.framework == 'qb' and FrameworkCore?.Functions.GetPlayer(src) or Config.framework == 'esx' and FrameworkCore?.GetPlayerFromId(src) or exports.qbx_core:GetPlayer(src)
+    local citizenid = Config.framework == 'esx' and Player.getIdentifier() or Player.PlayerData.citizenid
     return MySQL.query.await('SELECT * FROM `speakers_musics` WHERE `citizenid` = ?', { citizenid })
 end)
 
 lib.callback.register('mt_speakers:server:addMusic', function(source, data)
-    local Player = exports.qbx_core:GetPlayer(source)
-    local citizenid = Player.PlayerData.citizenid
+    local Player = Config.framework == 'qb' and FrameworkCore?.Functions.GetPlayer(src) or Config.framework == 'esx' and FrameworkCore?.GetPlayerFromId(src) or exports.qbx_core:GetPlayer(src)
+    local citizenid = Config.framework == 'esx' and Player.getIdentifier() or Player.PlayerData.citizenid
     MySQL.insert('INSERT INTO `speakers_musics` (citizenid, label, url) VALUES (?, ?, ?)', { citizenid, data.label, data.url })
     return true
 end)
@@ -116,10 +124,12 @@ end)
 
 lib.callback.register('mt_speakers:server:getCloseUsers', function(source, speakerId)
     local closePlayers = {}
-    for _, v in pairs(exports.qbx_core:GetQBPlayers()) do
-        if not v then goto continue end
-        if getUserAccess(v.PlayerData.citizenid, speakerId) then goto continue end
-        closePlayers[#closePlayers+1] = { id = v.PlayerData.source, citizenid = v.PlayerData.citizenid, name = v.PlayerData.charinfo.firstname..' '..v.PlayerData.charinfo.lastname }
+    for _, v in pairs(GetPlayers()) do
+        local Player = Config.framework == 'qb' and FrameworkCore?.Functions.GetPlayer(v) or Config.framework == 'esx' and FrameworkCore?.GetPlayerFromId(v) or exports.qbx_core:GetPlayer(v)
+        if not Player then goto continue end
+        local citizenid = Config.framework == 'esx' and Player.getIdentifier() or Player.PlayerData.citizenid
+        if getUserAccess(citizenid, speakerId) then goto continue end
+        closePlayers[#closePlayers+1] = { id = v, citizenid = citizenid, name = Config.framework == 'esx' and Player.getName() or  Player.PlayerData.charinfo.firstname..' '..Player.PlayerData.charinfo.lastname }
         :: continue ::
     end
     return closePlayers
@@ -128,7 +138,6 @@ end)
 lib.callback.register('mt_speakers:server:addAccess', function(source, user, speakerId)
     local users = MySQL.query.await('SELECT users FROM `speakers` WHERE `id` = ?', { speakerId })
     users = json.decode(users[1].users)
-    local Player = exports.qbx_core:GetPlayerByCitizenId(user)
     if not users then users = {} end
     users[#users+1] = user
     speakers[speakerId].users = users
@@ -140,7 +149,6 @@ end)
 lib.callback.register('mt_speakers:server:removeAccess', function(source, user, speakerId)
     local users = MySQL.query.await('SELECT users FROM `speakers` WHERE `id` = ?', { speakerId })
     users = json.decode(users[1].users)
-    local Player = exports.qbx_core:GetPlayerByCitizenId(user)
     if not users then users = {} end
     for uk, uv in pairs(users) do
         if uv.citizenid == user.citizenid then users[uk] = nil end
