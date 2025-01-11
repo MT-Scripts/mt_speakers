@@ -1,0 +1,6 @@
+{
+    "textui_place": "[SCROLL] - Speaker Rotation    \n[ENTER] - Place speaker    \n[BACKSPACE] - Cancel placement",
+
+    "target_interact": "Use",
+    "target_pickup": "Pick up"
+}
