@@ -1,6 +1,30 @@
 {
-    "textui_place": "[SCROLL] - Speaker Rotation    \n[ENTER] - Place speaker    \n[BACKSPACE] - Cancel placement",
+    "textui_place": "[SCROLL] - Speaker Rotation    \n[SHIFT + SCROLL] - Speaker distance    \n[ENTER] - Place speaker    \n[BACKSPACE] - Cancel placement",
 
     "target_interact": "Use",
-    "target_pickup": "Pick up"
+    "target_pickup": "Pick up",
+
+    "ui_playing": "Playing",
+    "ui_musics": "Musics",
+    "ui_accesses": "Accesses",
+    "ui_music_url": "Music URL",
+    "ui_url_description": "Only youtube URLs are supported",
+    "ui_resume": "Resume",
+    "ui_pause": "Pause",
+    "ui_change": "Change",
+    "ui_volume": "Volume",
+    "ui_distance": "Distance",
+    "ui_update": "Update volume and distance",
+    "ui_play": "Play",
+    "ui_delete": "Delete",
+    "ui_no_musics": "No musics added",
+    "ui_music_label": "Music label",
+    "ui_label_description": "Name to identify the music",
+    "ui_add_music": "Add music",
+    "ui_players_added": "Players added",
+    "ui_remove": "Remove",
+    "ui_no_players": "No players added",
+    "ui_add_player": "Add",
+    "ui_no_players_close": "No players close",
+    "ui_players_close": "Players close"
 }

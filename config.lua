@@ -1,6 +1,6 @@
 return {
-    framework = 'qbx', -- qbx, qb, esx (Really advice qbox)
     target = 'ox_target', -- ox_target, interact or qb-target
+    locale = 'en', -- UI locales (locales folder)
 
     speakers = {
         low_speaker = { prop = 'prop_boombox_01', maxVol = 30, maxDist = 20 },

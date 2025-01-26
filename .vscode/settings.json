@@ -1,0 +1,19 @@
+{
+    "Lua.diagnostics.globals": [
+        "lib",
+        "rotationToDirection",
+        "rayCastGamePlayCamera",
+        "cache",
+        "textUI",
+        "hideTextUI",
+        "locale",
+        "MySQL",
+        "createEntityTarget",
+        "itemName"
+    ],
+    "Lua.diagnostics.disable": [
+        "missing-parameter",
+        "param-type-mismatch",
+        "undefined-field"
+    ]
+}

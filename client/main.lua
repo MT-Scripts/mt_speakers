@@ -6,34 +6,45 @@ local clSpeakers = {}
 ---@param item any
 local useSpeaker = function(data, item)
     textUI(locale('textui_place'))
+    Player(cache.serverId).state:set('speakerInteracting', true, true)
     lib.callback.await('mt_speakers:server:itemActions', false, item.name, 'remove')
     local prop = CreateObject(GetHashKey(Config.speakers[item.name].prop), 0, 0, 0, false, false, false)
     local heading = GetEntityHeading(prop)
     SetEntityAlpha(prop, 150, false)
     SetEntityCollision(prop, false, false)
+    SetEntityDrawOutline(prop, true)
+    SetEntityDrawOutlineColor(prop, 255, 255, 255)
 
     CreateThread(function()
+        local distance = 3.0
         while true do
             Wait(0)
-            local coords = rayCastGamePlayCamera(4.0)
+            local coords = rayCastGamePlayCamera(distance)
             SetEntityCoords(prop, coords.x, coords.y, coords.z, heading, false, false, false)
             PlaceObjectOnGroundProperly(prop)
+            SetEntityHeading(prop, heading)
 
-            if IsControlPressed(0, 15) then
-                heading += 1.0
-                SetEntityHeading(prop, heading)
-            elseif IsControlPressed(0, 14) then
-                heading -= 1.0
-                SetEntityHeading(prop, heading)
+            if IsControlPressed(0, 21) then
+                if IsControlJustPressed(0, 15) then
+                    if distance < 10.0 then distance += 0.2 end
+                elseif IsControlJustPressed(0, 14) then
+                    if distance > 0.0 then distance -= 0.2 end
+                end
+            else
+                if IsControlPressed(0, 15) then
+                    heading += 1.0
+                elseif IsControlPressed(0, 14) then
+                    heading -= 1.0
+                end
             end
 
-            if IsControlPressed(0, 176) then
+            if IsControlJustPressed(0, 176) then
                 DeleteObject(prop)
                 DeleteEntity(prop)
                 hideTextUI()
                 lib.callback.await('mt_speakers:server:placeSpeaker', false, item.name, coords, heading)
                 break
-            elseif IsControlPressed(0, 177) then
+            elseif IsControlJustPressed(0, 177) then
                 DeleteObject(prop)
                 DeleteEntity(prop)
                 hideTextUI()
@@ -42,6 +53,7 @@ local useSpeaker = function(data, item)
             end
         end
     end)
+    Player(cache.serverId).state:set('speakerInteracting', false, true)
 end
 exports("useSpeaker", useSpeaker)
 lib.callback.register("useSpeaker", useSpeaker)
@@ -59,7 +71,8 @@ local updateSpeakerSettings = function(speaker, speakerId)
             musicPlaying = exports.xsound:soundExists('speaker_'..speakerId) or false,
             volume = exports.xsound:soundExists('speaker_'..speakerId) and (exports.xsound:getInfo('speaker_'..speakerId).volume * 100) or 0,
             distance = exports.xsound:soundExists('speaker_'..speakerId) and exports.xsound:getInfo('speaker_'..speakerId).distance or 0,
-            isPaused = exports.xsound:soundExists('speaker_'..speakerId) and exports.xsound:getInfo('speaker_'..speakerId).paused or false
+            isPaused = exports.xsound:soundExists('speaker_'..speakerId) and exports.xsound:getInfo('speaker_'..speakerId).paused or false,
+            locales = json.decode(LoadResourceFile(cache.resource, ('locales/%s.json'):format(Config.locale or 'en')))
         }
     })
 end
@@ -111,8 +124,10 @@ end
 
 ---@param speakerId number
 local deleteSpeaker = function(speakerId)
+    Player(cache.serverId).state:set('speakerInteracting', true, true)
     lib.callback.await('mt_speakers:server:deleteSpeaker', false, speakerId)
     lib.callback.await('mt_speakers:server:itemActions', false, clSpeakers[speakerId].item, 'add')
+    Player(cache.serverId).state:set('speakerInteracting', false, true)
 end
 
 local spawnAllSpeakers = function()

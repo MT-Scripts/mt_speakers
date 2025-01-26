@@ -1,6 +1,6 @@
 fx_version 'cerulean'
 author 'Marttins'
-description 'Most complete and powerful speakers script on FiveM'
+description 'Simple speakers script for FiveM'
 game 'gta5'
 lua54 'yes'
 
