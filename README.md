@@ -18,5 +18,6 @@ https://mt-scripts.dev/speakers
 - xsound
 
 # Disclaimer
-Based on new Rockstar & CFX Terms of Service, the use of APIs like youtube are not allowed, so it's totally your **responsability** to use this script!!
+Based on Rockstar & CFX Terms of Service, the use of streaming content like youtube is not allowed, so it's totally your **responsability** to use this script!!
+<br>
 (This is the why this script is no longer on our store and was made public for everyone now!)
