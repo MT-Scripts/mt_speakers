@@ -1,0 +1,30 @@
+{
+    "textui_place": "[SCROLL] - Rotação    \n[SHIFT + SCROLL] - Distância    \n[ENTER] - Colocar    \n[BACKSPACE] - Cancelar",
+
+    "target_interact": "Usar",
+    "target_pickup": "Apanhar",
+
+    "ui_playing": "A tocar",
+    "ui_musics": "Musicas",
+    "ui_accesses": "Acessos",
+    "ui_music_url": "URL da música",
+    "ui_url_description": "Apenas linkd o youtube",
+    "ui_resume": "Resumir",
+    "ui_pause": "Pausar",
+    "ui_change": "Alterar",
+    "ui_volume": "Volume",
+    "ui_distance": "Distância",
+    "ui_update": "Atualizar volume e distância",
+    "ui_play": "Tocar",
+    "ui_delete": "Eliminar",
+    "ui_no_musics": "Sem músicas",
+    "ui_music_label": "Nome da música",
+    "ui_label_description": "O nome que vai identificar a música",
+    "ui_add_music": "Adicionar música",
+    "ui_players_added": "Players adicionados",
+    "ui_remove": "Remover",
+    "ui_no_players": "Sem players",
+    "ui_add_player": "Adicionar",
+    "ui_no_players_close": "Nenhum player perto",
+    "ui_players_close": "Players perto"
+}

@@ -174,12 +174,12 @@ local despawnAllSpeakers = function()
     clSpeakers = {}
 end
 
-lib.callback.register('mt_speakers:client:updateSpeakerById', function(speakerId, speaker)
+RegisterNetEvent('mt_speakers:client:updateSpeakerById', function(speakerId, speaker)
     clSpeakers[speakerId] = speaker
     return true
 end)
 
-lib.callback.register('mt_speakers:client:deleteSpeaker', function(speakerId)
+RegisterNetEvent('mt_speakers:client:deleteSpeaker', function(speakerId)
     if clSpeakers[speakerId] then
         DeleteObject(clSpeakers[speakerId].prop)
         DeleteEntity(clSpeakers[speakerId].prop)
@@ -187,7 +187,7 @@ lib.callback.register('mt_speakers:client:deleteSpeaker', function(speakerId)
     end
 end)
 
-lib.callback.register('mt_speakers:client:updateSpeakers', function()
+RegisterNetEvent('mt_speakers:client:updateSpeakers', function()
     spawnAllSpeakers()
 end)
 

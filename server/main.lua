@@ -10,16 +10,12 @@ MySQL.ready(function()
 end)
 
 local updateSpeakers = function()
-    for _, v in pairs(GetPlayers()) do
-        lib.callback.await('mt_speakers:client:updateSpeakers', v)
-    end
+    TriggerClientEvent('mt_speakers:client:updateSpeakers', -1)
 end
 
 ---@param speakerId number
 local updateSpeakersById = function(speakerId)
-    for _, v in pairs(GetPlayers()) do
-        lib.callback.await('mt_speakers:client:updateSpeakerById', v, speakerId, speakers[speakerId])
-    end
+    TriggerClientEvent('mt_speakers:client:updateSpeakerById', -1, speakerId, speakers[speakerId])
 end
 
 ---@param citizenid string
@@ -37,9 +33,7 @@ end
 
 ---@param speakerId number
 local deleteSpeaker = function(speakerId)
-    for _, v in pairs(GetPlayers()) do
-        lib.callback.await('mt_speakers:client:deleteSpeaker', v, speakerId)
-    end
+    TriggerClientEvent('mt_speakers:client:deleteSpeaker', -1, speakerId)
 end
 
 lib.callback.register('mt_speakers:server:getUserAccess', function(source, speakerId)
@@ -128,7 +122,6 @@ end)
 lib.callback.register('mt_speakers:server:addAccess', function(source, user, speakerId)
     local users = MySQL.query.await('SELECT users FROM `speakers` WHERE `id` = ?', { speakerId })
     users = json.decode(users[1].users)
-    local Player = exports.qbx_core:GetPlayerByCitizenId(user)
     if not users then users = {} end
     users[#users+1] = user
     speakers[speakerId].users = users
@@ -140,7 +133,6 @@ end)
 lib.callback.register('mt_speakers:server:removeAccess', function(source, user, speakerId)
     local users = MySQL.query.await('SELECT users FROM `speakers` WHERE `id` = ?', { speakerId })
     users = json.decode(users[1].users)
-    local Player = exports.qbx_core:GetPlayerByCitizenId(user)
     if not users then users = {} end
     for uk, uv in pairs(users) do
         if uv.citizenid == user.citizenid then users[uk] = nil end
@@ -154,6 +146,16 @@ end)
 lib.callback.register('mt_speakers:server:itemActions', function(source, speaker, action)
     local src = source
     if not Player(src).state.speakerInteracting then return end
+
+    local isSpeakerItem = false
+    for item, _ in pairs(Config.speakers) do
+        if item == speaker then
+            isSpeakerItem = true
+            break
+        end
+    end
+    if not isSpeakerItem then return end
+
     if action == 'remove' then
         exports.ox_inventory:RemoveItem(src, speaker, 1)
     else
