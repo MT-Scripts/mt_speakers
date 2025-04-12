@@ -53,7 +53,6 @@ local useSpeaker = function(data, item)
             end
         end
     end)
-    Player(cache.serverId).state:set('speakerInteracting', false, true)
 end
 exports("useSpeaker", useSpeaker)
 lib.callback.register("useSpeaker", useSpeaker)
@@ -125,8 +124,13 @@ end
 ---@param speakerId number
 local deleteSpeaker = function(speakerId)
     Player(cache.serverId).state:set('speakerInteracting', true, true)
-    lib.callback.await('mt_speakers:server:deleteSpeaker', false, speakerId)
-    lib.callback.await('mt_speakers:server:itemActions', false, clSpeakers[speakerId].item, 'add')
+
+    local success = lib.callback.await('mt_speakers:server:deleteSpeaker', false, speakerId)
+
+    if not success then
+        notify(locale('notify_already_pickedup'), 'error')
+    end
+
     Player(cache.serverId).state:set('speakerInteracting', false, true)
 end
 

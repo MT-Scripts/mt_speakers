@@ -28,6 +28,12 @@ hideTextUI = function()
     lib.hideTextUI()
 end
 
+---@param message string
+---@param type string
+notify = function(message, type)
+    lib.notify({ description = message, type = type })
+end
+
 ---@param entity integer
 ---@param options table
 ---@param distance number

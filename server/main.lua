@@ -1,5 +1,12 @@
 local Config = lib.load('config')
 local speakers = {}
+local pickupStatus = {}
+
+AddEventHandler('onResourceStop', function(res)
+    if res == GetCurrentResourceName() then
+        pickupStatus = {}
+    end
+end)
 
 MySQL.ready(function()
     MySQL.Async.fetchAll('SELECT * FROM `speakers`', {}, function(result)
@@ -36,6 +43,23 @@ local deleteSpeaker = function(speakerId)
     TriggerClientEvent('mt_speakers:client:deleteSpeaker', -1, speakerId)
 end
 
+local pickupStatus = {}
+
+---@param speakerId number
+---@return boolean
+function canPickup(speakerId)
+    if pickupStatus[speakerId] then
+        return false
+    end
+    pickupStatus[speakerId] = true
+    return true
+end
+
+---@param speakerId number
+function releasePickup(speakerId)
+    pickupStatus[speakerId] = false
+end
+
 lib.callback.register('mt_speakers:server:getUserAccess', function(source, speakerId)
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
@@ -66,11 +90,24 @@ lib.callback.register('mt_speakers:server:getSpeakers', function()
 end)
 
 lib.callback.register('mt_speakers:server:deleteSpeaker', function(source, speakerId)
-    MySQL.Async.execute('DELETE FROM `speakers` WHERE `id` = ?', { speakerId }, function()
-        exports.xsound:Destroy(-1, 'speaker_'..speakerId)
-        speakers[speakerId] = nil
-        deleteSpeaker(speakerId)
+    if not speakers[speakerId] then
+        return false, 'Speaker não encontrado.'
+    end
+
+    if not canPickup(speakerId) then
+        return false, 'Alguém já está pegando esse speaker.'
+    end
+
+    exports.xsound:Destroy(-1, 'speaker_'..speakerId)
+
+    MySQL.Async.execute('DELETE FROM `speakers` WHERE `id` = ?', { speakerId }, function(rowsChanged)
+        if rowsChanged > 0 then
+            speakers[speakerId] = nil
+            deleteSpeaker(speakerId)
+        end
+        releasePickup(speakerId)
     end)
+
     return true
 end)
 
@@ -145,7 +182,6 @@ end)
 
 lib.callback.register('mt_speakers:server:itemActions', function(source, speaker, action)
     local src = source
-    if not Player(src).state.speakerInteracting then return end
 
     local isSpeakerItem = false
     for item, _ in pairs(Config.speakers) do

@@ -4,6 +4,8 @@
     "target_interact": "Usar",
     "target_pickup": "Apanhar",
 
+    "notify_already_pickedup": "Alguém já está a pegar essa coluna..",
+
     "ui_playing": "A tocar",
     "ui_musics": "Musicas",
     "ui_accesses": "Acessos",

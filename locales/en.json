@@ -4,6 +4,8 @@
     "target_interact": "Use",
     "target_pickup": "Pick up",
 
+    "notify_already_pickedup": "Someone is already picking it up..",
+
     "ui_playing": "Playing",
     "ui_musics": "Musics",
     "ui_accesses": "Accesses",
