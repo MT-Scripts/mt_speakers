@@ -129,6 +129,8 @@ local deleteSpeaker = function(speakerId)
 
     if not success then
         notify(locale('notify_already_pickedup'), 'error')
+    else
+        lib.callback.await('mt_speakers:server:itemActions', false, clSpeakers[speakerId].item, 'add')
     end
 
     Player(cache.serverId).state:set('speakerInteracting', false, true)
