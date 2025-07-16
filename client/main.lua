@@ -181,16 +181,53 @@ local despawnAllSpeakers = function()
 end
 
 RegisterNetEvent('mt_speakers:client:updateSpeakerById', function(speakerId, speaker)
+    -- Preserve the existing prop entity handle if it exists
+    local existingProp = clSpeakers[speakerId] and clSpeakers[speakerId].prop or nil
+    
+    -- Update the speaker data but keep the client-side prop
     clSpeakers[speakerId] = speaker
+    
+    -- Restore the prop entity handle (server doesn't have this)
+    if existingProp and type(existingProp) == 'number' then
+        clSpeakers[speakerId].prop = existingProp
+    end
+    
     return true
 end)
 
-RegisterNetEvent('mt_speakers:client:deleteSpeaker', function(speakerId)
+RegisterNetEvent('mt_speakers:client:updateSpeakerUsers', function(speakerId, users)
     if clSpeakers[speakerId] then
-        DeleteObject(clSpeakers[speakerId].prop)
-        DeleteEntity(clSpeakers[speakerId].prop)
-        clSpeakers[speakerId] = nil
+        clSpeakers[speakerId].users = users
     end
+end)
+
+RegisterNetEvent('mt_speakers:client:deleteSpeaker', function(speakerId)
+    if not clSpeakers[speakerId] then return end
+    
+    local prop = clSpeakers[speakerId].prop
+    
+    -- Handle both number (entity handle) and table (corrupted data)
+    if type(prop) == 'number' and prop ~= 0 then
+        local success, exists = pcall(DoesEntityExist, prop)
+        if success and exists then
+            pcall(DeleteObject, prop)
+            Wait(10)
+            local success2, exists2 = pcall(DoesEntityExist, prop)
+            if success2 and exists2 then
+                pcall(DeleteEntity, prop)
+            end
+        end
+    elseif type(prop) == 'table' then
+        -- Try to clean up if there's an entity reference in the table
+        if prop.entity and type(prop.entity) == 'number' then
+            local success, exists = pcall(DoesEntityExist, prop.entity)
+            if success and exists then
+                pcall(DeleteObject, prop.entity)
+            end
+        end
+    end
+    
+    clSpeakers[speakerId] = nil
 end)
 
 RegisterNetEvent('mt_speakers:client:updateSpeakers', function()

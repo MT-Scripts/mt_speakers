@@ -22,7 +22,19 @@ end
 
 ---@param speakerId number
 local updateSpeakersById = function(speakerId)
-    TriggerClientEvent('mt_speakers:client:updateSpeakerById', -1, speakerId, speakers[speakerId])
+    local speakerData = {
+        item = speakers[speakerId].item,
+        location = speakers[speakerId].location,
+        users = speakers[speakerId].users,
+        id = speakers[speakerId].id,
+        owner = speakers[speakerId].owner
+        --exclude 'prop' as it's client-side only
+    }
+    TriggerClientEvent('mt_speakers:client:updateSpeakerById', -1, speakerId, speakerData)
+end
+
+local updateSpeakerUsers = function(speakerId)
+    TriggerClientEvent('mt_speakers:client:updateSpeakerUsers', -1, speakerId, speakers[speakerId].users)
 end
 
 ---@param citizenid string
@@ -162,7 +174,7 @@ lib.callback.register('mt_speakers:server:addAccess', function(source, user, spe
     if not users then users = {} end
     users[#users+1] = user
     speakers[speakerId].users = users
-    updateSpeakersById(speakerId)
+    updateSpeakerUsers(speakerId) -- Use specific update instead of full sync
     MySQL.update.await('UPDATE speakers SET `users` = ? WHERE id = ?', { json.encode(users), speakerId })
     return true
 end)
@@ -175,7 +187,7 @@ lib.callback.register('mt_speakers:server:removeAccess', function(source, user, 
         if uv.citizenid == user.citizenid then users[uk] = nil end
     end
     speakers[speakerId].users = users
-    updateSpeakersById(speakerId)
+    updateSpeakerUsers(speakerId) -- Use specific update instead of full sync
     MySQL.update.await('UPDATE speakers SET `users` = ? WHERE id = ?', { json.encode(users), speakerId })
     return true
 end)
